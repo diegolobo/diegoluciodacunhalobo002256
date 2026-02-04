@@ -1,11 +1,16 @@
 package br.com.rockstars.service;
 
 import br.com.rockstars.domain.dto.AlbumDTO;
+import br.com.rockstars.domain.dto.ArtistDTO;
+import br.com.rockstars.domain.dto.PageResponseDTO;
 import br.com.rockstars.domain.entity.Album;
 import br.com.rockstars.domain.entity.Artist;
+import br.com.rockstars.domain.enums.ArtistType;
 import br.com.rockstars.exception.BusinessException;
 import br.com.rockstars.exception.NotFoundException;
 import br.com.rockstars.repository.AlbumRepository;
+import io.quarkus.panache.common.Page;
+import io.quarkus.panache.common.Sort;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -25,6 +30,21 @@ public class AlbumService {
         return albumRepository.listAll().stream()
             .map(AlbumDTO::fromEntity)
             .collect(Collectors.toList());
+    }
+
+    public PageResponseDTO<AlbumDTO> findAll(int page, int size, String title, Long artistId, ArtistType artistType, Boolean active, String sortField, String sortDirection) {
+        Sort sort = buildSort(sortField, sortDirection);
+
+        List<AlbumDTO> content = albumRepository.findWithFilters(title, artistId, artistType, active, sort)
+            .page(Page.of(page, size))
+            .list()
+            .stream()
+            .map(AlbumDTO::fromEntity)
+            .collect(Collectors.toList());
+
+        long totalElements = albumRepository.countWithFilters(title, artistId, artistType, active);
+
+        return PageResponseDTO.of(content, page, size, totalElements);
     }
 
     public AlbumDTO findById(Long id) {
@@ -97,5 +117,28 @@ public class AlbumService {
         album.removeArtist(artist);
         albumRepository.persist(album);
         return AlbumDTO.fromEntity(album);
+    }
+
+    public List<ArtistDTO> findArtistsByAlbumId(Long albumId) {
+        Album album = albumRepository.findById(albumId);
+        if (album == null) {
+            throw new NotFoundException("Album", albumId);
+        }
+        return album.getArtists().stream()
+            .map(ArtistDTO::fromEntity)
+            .collect(Collectors.toList());
+    }
+
+    private Sort buildSort(String sortField, String sortDirection) {
+        if (sortField == null || sortField.isBlank()) {
+            return Sort.by("title");
+        }
+
+        Sort.Direction direction = Sort.Direction.Ascending;
+        if (sortDirection != null && sortDirection.equalsIgnoreCase("desc")) {
+            direction = Sort.Direction.Descending;
+        }
+
+        return Sort.by(sortField, direction);
     }
 }

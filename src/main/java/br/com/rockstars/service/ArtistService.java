@@ -1,9 +1,15 @@
 package br.com.rockstars.service;
 
+import br.com.rockstars.domain.dto.AlbumDTO;
 import br.com.rockstars.domain.dto.ArtistDTO;
+import br.com.rockstars.domain.dto.PageResponseDTO;
 import br.com.rockstars.domain.entity.Artist;
+import br.com.rockstars.domain.enums.ArtistType;
 import br.com.rockstars.exception.NotFoundException;
+import br.com.rockstars.repository.AlbumRepository;
 import br.com.rockstars.repository.ArtistRepository;
+import io.quarkus.panache.common.Page;
+import io.quarkus.panache.common.Sort;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -16,10 +22,28 @@ public class ArtistService {
     @Inject
     ArtistRepository artistRepository;
 
+    @Inject
+    AlbumRepository albumRepository;
+
     public List<ArtistDTO> findAll() {
         return artistRepository.listAll().stream()
             .map(ArtistDTO::fromEntity)
             .collect(Collectors.toList());
+    }
+
+    public PageResponseDTO<ArtistDTO> findAll(int page, int size, String name, ArtistType type, Boolean active, String sortField, String sortDirection) {
+        Sort sort = buildSort(sortField, sortDirection);
+
+        List<ArtistDTO> content = artistRepository.findWithFilters(name, type, active, sort)
+            .page(Page.of(page, size))
+            .list()
+            .stream()
+            .map(ArtistDTO::fromEntity)
+            .collect(Collectors.toList());
+
+        long totalElements = artistRepository.countWithFilters(name, type, active);
+
+        return PageResponseDTO.of(content, page, size, totalElements);
     }
 
     public ArtistDTO findById(Long id) {
@@ -64,5 +88,28 @@ public class ArtistService {
         }
         artist.setActive(false);
         artistRepository.persist(artist);
+    }
+
+    public List<AlbumDTO> findAlbumsByArtistId(Long artistId) {
+        Artist artist = artistRepository.findById(artistId);
+        if (artist == null) {
+            throw new NotFoundException("Artista", artistId);
+        }
+        return albumRepository.findByArtistId(artistId).stream()
+            .map(AlbumDTO::fromEntityWithoutRelations)
+            .collect(Collectors.toList());
+    }
+
+    private Sort buildSort(String sortField, String sortDirection) {
+        if (sortField == null || sortField.isBlank()) {
+            return Sort.by("name");
+        }
+
+        Sort.Direction direction = Sort.Direction.Ascending;
+        if (sortDirection != null && sortDirection.equalsIgnoreCase("desc")) {
+            direction = Sort.Direction.Descending;
+        }
+
+        return Sort.by(sortField, direction);
     }
 }

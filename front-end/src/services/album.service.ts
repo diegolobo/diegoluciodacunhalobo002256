@@ -61,11 +61,7 @@ export const albumService = {
     const formData = new FormData()
     formData.append('file', file)
 
-    const response = await api.post<AlbumCover>(`/api/v1/albums/${albumId}/covers`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    })
+    const response = await api.post<AlbumCover>(`/api/v1/albums/${albumId}/covers`, formData)
     return response.data
   },
 
@@ -75,11 +71,7 @@ export const albumService = {
       formData.append('files', file)
     })
 
-    const response = await api.post<AlbumCover[]>(`/api/v1/albums/${albumId}/covers/batch`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    })
+    const response = await api.post<AlbumCover[]>(`/api/v1/albums/${albumId}/covers/batch`, formData)
     return response.data
   },
 

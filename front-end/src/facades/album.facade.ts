@@ -1,4 +1,5 @@
-import { albumService, AlbumFilterParams } from '../services/album.service'
+import { albumService } from '../services/album.service'
+import type { AlbumFilterParams } from '../services/album.service'
 import type { Album, AlbumRequest, AlbumCover, Artist, PageResponse } from '../types'
 
 export interface AlbumState {

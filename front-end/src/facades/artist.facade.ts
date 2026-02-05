@@ -1,4 +1,5 @@
-import { artistService, ArtistFilterParams } from '../services/artist.service'
+import { artistService } from '../services/artist.service'
+import type { ArtistFilterParams } from '../services/artist.service'
 import type { Artist, ArtistRequest, Album, PageResponse } from '../types'
 
 export interface ArtistState {

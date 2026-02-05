@@ -21,6 +21,9 @@ public class StorageService {
     @ConfigProperty(name = "minio.bucket.album-covers")
     String albumCoversBucket;
 
+    @ConfigProperty(name = "minio.public.url", defaultValue = "")
+    String minioPublicUrl;
+
     public String uploadFile(InputStream inputStream, String fileName, String contentType, long size) {
         try {
             String minioKey = generateMinioKey(fileName);
@@ -55,7 +58,7 @@ public class StorageService {
 
     public String getPresignedUrl(String minioKey, int expirationMinutes) {
         try {
-            return minioClient.getPresignedObjectUrl(
+            String url = minioClient.getPresignedObjectUrl(
                 GetPresignedObjectUrlArgs.builder()
                     .method(Method.GET)
                     .bucket(albumCoversBucket)
@@ -63,6 +66,12 @@ public class StorageService {
                     .expiry(expirationMinutes, TimeUnit.MINUTES)
                     .build()
             );
+
+            if (minioPublicUrl != null && !minioPublicUrl.isEmpty()) {
+                url = url.replaceFirst("http://[^/]+", minioPublicUrl);
+            }
+
+            return url;
         } catch (Exception e) {
             throw new RuntimeException("Erro ao gerar URL: " + e.getMessage(), e);
         }

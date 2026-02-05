@@ -95,7 +95,7 @@ services:
       QUARKUS_LOG_CONSOLE_ENABLED: 'true'
       QUARKUS_LOG_LEVEL: INFO
     ports:
-      - '9001:8080'
+      - '3000:8080'
     healthcheck:
       test:
         - CMD

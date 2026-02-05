@@ -61,7 +61,7 @@ services:
       QUARKUS_MINIO_ACCESS_KEY: rockstarsAccessKey2024
       QUARKUS_MINIO_SECRET_KEY: R0ckst4rsS3cr3tK3y24
       MINIO_BUCKET_ALBUM_COVERS: album-covers
-      MINIO_PUBLIC_URL: 'https://rockstars-api.dots.dev.br:9000'
+      MINIO_PUBLIC_URL: 'https://minio.dots.dev.br'
       MP_JWT_VERIFY_PUBLICKEY_LOCATION: publicKey.pem
       MP_JWT_VERIFY_ISSUER: 'https://rockstars.com.br'
       SMALLRYE_JWT_SIGN_KEY_LOCATION: privateKey.pem

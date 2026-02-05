@@ -75,8 +75,6 @@ public class AuthService {
     }
 
     public static class BcryptUtil {
-        private static final org.mindrot.jbcrypt.BCrypt bcrypt = new org.mindrot.jbcrypt.BCrypt();
-
         public static String hash(String password) {
             return org.mindrot.jbcrypt.BCrypt.hashpw(password, org.mindrot.jbcrypt.BCrypt.gensalt(10));
         }

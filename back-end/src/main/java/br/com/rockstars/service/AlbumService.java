@@ -32,9 +32,13 @@ public class AlbumService {
     @Inject
     AlbumNotificationSocket notificationSocket;
 
+    @Inject
+    StorageService storageService;
+
     public List<AlbumDTO> findAll() {
         return albumRepository.listAll().stream()
             .map(AlbumDTO::fromEntity)
+            .map(this::addPresignedUrls)
             .collect(Collectors.toList());
     }
 
@@ -46,6 +50,7 @@ public class AlbumService {
             .list()
             .stream()
             .map(AlbumDTO::fromEntity)
+            .map(this::addPresignedUrls)
             .collect(Collectors.toList());
 
         long totalElements = albumRepository.countWithFilters(title, artistId, artistType, active);
@@ -58,7 +63,7 @@ public class AlbumService {
         if (album == null) {
             throw new NotFoundException("Album", id);
         }
-        return AlbumDTO.fromEntity(album);
+        return addPresignedUrls(AlbumDTO.fromEntity(album));
     }
 
     public Album findEntityById(Long id) {
@@ -73,7 +78,7 @@ public class AlbumService {
     public AlbumDTO create(AlbumRequestDTO dto) {
         Album album = dto.toEntity();
         albumRepository.persist(album);
-        AlbumDTO result = AlbumDTO.fromEntity(album);
+        AlbumDTO result = addPresignedUrls(AlbumDTO.fromEntity(album));
         notificationSocket.broadcast(AlbumNotificationDTO.created(result));
         return result;
     }
@@ -86,7 +91,7 @@ public class AlbumService {
         }
         dto.updateEntity(album);
         albumRepository.persist(album);
-        return AlbumDTO.fromEntity(album);
+        return addPresignedUrls(AlbumDTO.fromEntity(album));
     }
 
     @Transactional
@@ -110,7 +115,7 @@ public class AlbumService {
 
         album.addArtist(artist);
         albumRepository.persist(album);
-        return AlbumDTO.fromEntity(album);
+        return addPresignedUrls(AlbumDTO.fromEntity(album));
     }
 
     @Transactional
@@ -124,7 +129,7 @@ public class AlbumService {
 
         album.removeArtist(artist);
         albumRepository.persist(album);
-        return AlbumDTO.fromEntity(album);
+        return addPresignedUrls(AlbumDTO.fromEntity(album));
     }
 
     public List<ArtistDTO> findArtistsByAlbumId(Long albumId) {
@@ -148,5 +153,19 @@ public class AlbumService {
         }
 
         return Sort.by(sortField, direction);
+    }
+
+    private AlbumDTO addPresignedUrls(AlbumDTO dto) {
+        if (dto.getCovers() != null) {
+            dto.getCovers().forEach(cover -> {
+                if (cover.getMinioKey() != null) {
+                    try {
+                        cover.setPresignedUrl(storageService.getPresignedUrl(cover.getMinioKey()));
+                    } catch (Exception e) {
+                    }
+                }
+            });
+        }
+        return dto;
     }
 }

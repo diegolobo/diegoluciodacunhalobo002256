@@ -31,6 +31,9 @@ public class ArtistService {
     @Inject
     RegionalRepository regionalRepository;
 
+    @Inject
+    StorageService storageService;
+
     public List<ArtistDTO> findAll() {
         return artistRepository.listAll().stream()
             .map(ArtistDTO::fromEntity)
@@ -116,8 +119,23 @@ public class ArtistService {
             throw new NotFoundException("Artista", artistId);
         }
         return albumRepository.findByArtistId(artistId).stream()
-            .map(AlbumDTO::fromEntityWithoutRelations)
+            .map(AlbumDTO::fromEntity)
+            .map(this::addPresignedUrls)
             .collect(Collectors.toList());
+    }
+
+    private AlbumDTO addPresignedUrls(AlbumDTO dto) {
+        if (dto.getCovers() != null) {
+            dto.getCovers().forEach(cover -> {
+                if (cover.getMinioKey() != null) {
+                    try {
+                        cover.setPresignedUrl(storageService.getPresignedUrl(cover.getMinioKey()));
+                    } catch (Exception e) {
+                    }
+                }
+            });
+        }
+        return dto;
     }
 
     private Sort buildSort(String sortField, String sortDirection) {

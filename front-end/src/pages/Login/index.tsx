@@ -111,7 +111,7 @@ function Login() {
         <div className="mt-6 text-center">
           <button
             onClick={toggleTheme}
-            className="text-sm text-dark-500 dark:text-cream-200 hover:text-dark-800 dark:hover:text-cream-100 transition-colors"
+            className="px-4 py-2 text-sm border-2 border-accent-gold text-accent-gold hover:bg-accent-gold hover:text-white rounded-lg transition-colors cursor-pointer"
           >
             {theme === 'light' ? '🌙 Modo escuro' : '☀️ Modo claro'}
           </button>

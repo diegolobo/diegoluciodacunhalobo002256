@@ -26,6 +26,7 @@ dependencies {
     implementation 'io.quarkus:quarkus-websockets-next'
     implementation 'io.quarkiverse.minio:quarkus-minio:3.8.6'
     implementation 'io.quarkus:quarkus-rest-client-jackson'
+    implementation 'org.mindrot:jbcrypt:0.4'
     testImplementation 'io.quarkus:quarkus-junit5'
     testImplementation 'io.rest-assured:rest-assured'
 }

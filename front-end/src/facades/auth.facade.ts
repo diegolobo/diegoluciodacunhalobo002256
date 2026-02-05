@@ -1,5 +1,5 @@
 import { authService } from '../services/auth.service'
-import { LoginRequest, User } from '../types/auth.types'
+import type { LoginRequest, User } from '../types'
 
 export interface AuthState {
   user: User | null

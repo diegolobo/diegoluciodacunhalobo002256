@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react'
 import { authFacade } from '../facades/auth.facade'
 import { authService } from '../services/auth.service'
-import { User, LoginRequest } from '../types/auth.types'
+import type { User, LoginRequest } from '../types'
 
 interface AuthContextData {
   user: User | null

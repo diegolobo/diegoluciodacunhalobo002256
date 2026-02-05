@@ -94,8 +94,8 @@ services:
       APP_ADMIN_ENABLED: 'true'
       QUARKUS_LOG_CONSOLE_ENABLED: 'true'
       QUARKUS_LOG_LEVEL: INFO
-    expose:
-      - "8080"
+    ports:
+      - '9001:8080'
     healthcheck:
       test:
         - CMD

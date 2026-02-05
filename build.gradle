@@ -28,6 +28,8 @@ dependencies {
     implementation 'io.quarkus:quarkus-rest-client-jackson'
     implementation 'org.mindrot:jbcrypt:0.4'
     testImplementation 'io.quarkus:quarkus-junit5'
+    testImplementation 'io.quarkus:quarkus-junit5-mockito'
+    testImplementation 'io.quarkus:quarkus-test-security'
     testImplementation 'io.rest-assured:rest-assured'
 }
 

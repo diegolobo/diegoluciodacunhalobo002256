@@ -1,9 +1,11 @@
 package br.com.rockstars.service;
 
 import br.com.rockstars.domain.dto.AlbumDTO;
+import br.com.rockstars.domain.dto.AlbumNotificationDTO;
 import br.com.rockstars.domain.dto.AlbumRequestDTO;
 import br.com.rockstars.domain.dto.ArtistDTO;
 import br.com.rockstars.domain.dto.PageResponseDTO;
+import br.com.rockstars.websocket.AlbumNotificationSocket;
 import br.com.rockstars.domain.entity.Album;
 import br.com.rockstars.domain.entity.Artist;
 import br.com.rockstars.domain.enums.ArtistType;
@@ -26,6 +28,9 @@ public class AlbumService {
 
     @Inject
     ArtistService artistService;
+
+    @Inject
+    AlbumNotificationSocket notificationSocket;
 
     public List<AlbumDTO> findAll() {
         return albumRepository.listAll().stream()
@@ -68,7 +73,9 @@ public class AlbumService {
     public AlbumDTO create(AlbumRequestDTO dto) {
         Album album = dto.toEntity();
         albumRepository.persist(album);
-        return AlbumDTO.fromEntity(album);
+        AlbumDTO result = AlbumDTO.fromEntity(album);
+        notificationSocket.broadcast(AlbumNotificationDTO.created(result));
+        return result;
     }
 
     @Transactional

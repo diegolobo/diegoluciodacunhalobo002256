@@ -1,6 +1,7 @@
 package br.com.rockstars.service;
 
 import br.com.rockstars.domain.dto.AlbumDTO;
+import br.com.rockstars.domain.dto.AlbumRequestDTO;
 import br.com.rockstars.domain.dto.ArtistDTO;
 import br.com.rockstars.domain.dto.PageResponseDTO;
 import br.com.rockstars.domain.entity.Album;
@@ -64,14 +65,14 @@ public class AlbumService {
     }
 
     @Transactional
-    public AlbumDTO create(AlbumDTO dto) {
+    public AlbumDTO create(AlbumRequestDTO dto) {
         Album album = dto.toEntity();
         albumRepository.persist(album);
         return AlbumDTO.fromEntity(album);
     }
 
     @Transactional
-    public AlbumDTO update(Long id, AlbumDTO dto) {
+    public AlbumDTO update(Long id, AlbumRequestDTO dto) {
         Album album = albumRepository.findById(id);
         if (album == null) {
             throw new NotFoundException("Album", id);

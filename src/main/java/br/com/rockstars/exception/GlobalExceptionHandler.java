@@ -1,6 +1,7 @@
 package br.com.rockstars.exception;
 
 import br.com.rockstars.domain.dto.ErrorResponseDTO;
+import io.quarkus.logging.Log;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.ws.rs.core.Context;
@@ -56,10 +57,11 @@ public class GlobalExceptionHandler {
 
     @ServerExceptionMapper
     public Response handleGenericException(Exception ex) {
+        Log.error("Erro interno: " + ex.getMessage(), ex);
         ErrorResponseDTO error = ErrorResponseDTO.of(
             Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
             "Internal Server Error",
-            "Erro interno do servidor",
+            ex.getMessage(),
             getPath()
         );
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(error).build();

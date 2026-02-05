@@ -1,6 +1,7 @@
 package br.com.rockstars.resource;
 
 import br.com.rockstars.domain.dto.AlbumDTO;
+import br.com.rockstars.domain.dto.AlbumRequestDTO;
 import br.com.rockstars.domain.dto.ArtistDTO;
 import br.com.rockstars.domain.dto.PageResponseDTO;
 import br.com.rockstars.domain.enums.ArtistType;
@@ -55,14 +56,14 @@ public class AlbumResource {
     }
 
     @POST
-    public Response create(@Valid AlbumDTO dto) {
+    public Response create(@Valid AlbumRequestDTO dto) {
         AlbumDTO created = albumService.create(dto);
         return Response.status(Response.Status.CREATED).entity(created).build();
     }
 
     @PUT
     @Path("/{id}")
-    public AlbumDTO update(@PathParam("id") Long id, @Valid AlbumDTO dto) {
+    public AlbumDTO update(@PathParam("id") Long id, @Valid AlbumRequestDTO dto) {
         return albumService.update(id, dto);
     }
 

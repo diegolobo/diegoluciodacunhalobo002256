@@ -5,10 +5,12 @@ import br.com.rockstars.domain.dto.ArtistDTO;
 import br.com.rockstars.domain.dto.ArtistRequestDTO;
 import br.com.rockstars.domain.dto.PageResponseDTO;
 import br.com.rockstars.domain.entity.Artist;
+import br.com.rockstars.domain.entity.Regional;
 import br.com.rockstars.domain.enums.ArtistType;
 import br.com.rockstars.exception.NotFoundException;
 import br.com.rockstars.repository.AlbumRepository;
 import br.com.rockstars.repository.ArtistRepository;
+import br.com.rockstars.repository.RegionalRepository;
 import io.quarkus.panache.common.Page;
 import io.quarkus.panache.common.Sort;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -26,23 +28,26 @@ public class ArtistService {
     @Inject
     AlbumRepository albumRepository;
 
+    @Inject
+    RegionalRepository regionalRepository;
+
     public List<ArtistDTO> findAll() {
         return artistRepository.listAll().stream()
             .map(ArtistDTO::fromEntity)
             .collect(Collectors.toList());
     }
 
-    public PageResponseDTO<ArtistDTO> findAll(int page, int size, String name, ArtistType type, Boolean active, String sortField, String sortDirection) {
+    public PageResponseDTO<ArtistDTO> findAll(int page, int size, String name, ArtistType type, Boolean active, Long regionalId, String sortField, String sortDirection) {
         Sort sort = buildSort(sortField, sortDirection);
 
-        List<ArtistDTO> content = artistRepository.findWithFilters(name, type, active, sort)
+        List<ArtistDTO> content = artistRepository.findWithFilters(name, type, active, regionalId, sort)
             .page(Page.of(page, size))
             .list()
             .stream()
             .map(ArtistDTO::fromEntity)
             .collect(Collectors.toList());
 
-        long totalElements = artistRepository.countWithFilters(name, type, active);
+        long totalElements = artistRepository.countWithFilters(name, type, active, regionalId);
 
         return PageResponseDTO.of(content, page, size, totalElements);
     }
@@ -66,6 +71,7 @@ public class ArtistService {
     @Transactional
     public ArtistDTO create(ArtistRequestDTO dto) {
         Artist artist = dto.toEntity();
+        setRegional(artist, dto.getRegionalId());
         artistRepository.persist(artist);
         return ArtistDTO.fromEntity(artist);
     }
@@ -77,8 +83,21 @@ public class ArtistService {
             throw new NotFoundException("Artista", id);
         }
         dto.updateEntity(artist);
+        setRegional(artist, dto.getRegionalId());
         artistRepository.persist(artist);
         return ArtistDTO.fromEntity(artist);
+    }
+
+    private void setRegional(Artist artist, Long regionalId) {
+        if (regionalId != null) {
+            Regional regional = regionalRepository.findById(regionalId);
+            if (regional == null) {
+                throw new NotFoundException("Regional", regionalId);
+            }
+            artist.setRegional(regional);
+        } else {
+            artist.setRegional(null);
+        }
     }
 
     @Transactional

@@ -17,6 +17,8 @@ public class ArtistRequestDTO {
 
     private Boolean active;
 
+    private Long regionalId;
+
     public ArtistRequestDTO() {
     }
 
@@ -67,5 +69,13 @@ public class ArtistRequestDTO {
 
     public void setActive(Boolean active) {
         this.active = active;
+    }
+
+    public Long getRegionalId() {
+        return regionalId;
+    }
+
+    public void setRegionalId(Long regionalId) {
+        this.regionalId = regionalId;
     }
 }

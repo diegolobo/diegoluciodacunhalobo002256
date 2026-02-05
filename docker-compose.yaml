@@ -1,0 +1,156 @@
+services:
+  # =============================================================================
+  # PostgreSQL Database
+  # =============================================================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: rockstars-postgres
+    environment:
+      POSTGRES_USER: sa_rockstar
+      POSTGRES_PASSWORD: R0ckst4rs9x
+      POSTGRES_DB: rockstars_dev
+    ports:
+      - "9004:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sa_rockstar -d rockstars_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - rockstars-network
+
+  # =============================================================================
+  # MinIO Object Storage
+  # =============================================================================
+  minio:
+    image: minio/minio:latest
+    container_name: rockstars-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: rockstarsAccessKey2024
+      MINIO_ROOT_PASSWORD: R0ckst4rsS3cr3tK3y24
+    ports:
+      - "9002:9000"
+      - "9003:9001"
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - rockstars-network
+
+  # =============================================================================
+  # MinIO Setup - Create bucket on startup
+  # =============================================================================
+  minio-setup:
+    image: minio/mc:latest
+    container_name: rockstars-minio-setup
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      mc alias set myminio http://minio:9000 rockstarsAccessKey2024 R0ckst4rsS3cr3tK3y24;
+      mc mb myminio/album-covers --ignore-existing;
+      mc anonymous set public myminio/album-covers;
+      echo 'Bucket album-covers criado com sucesso!';
+      exit 0;
+      "
+    networks:
+      - rockstars-network
+
+  # =============================================================================
+  # Rockstars API - Quarkus Application
+  # =============================================================================
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rockstars-api
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      minio-setup:
+        condition: service_completed_successfully
+    environment:
+      # Datasource
+      QUARKUS_DATASOURCE_DB_KIND: postgresql
+      QUARKUS_DATASOURCE_USERNAME: sa_rockstar
+      QUARKUS_DATASOURCE_PASSWORD: R0ckst4rs9x
+      QUARKUS_DATASOURCE_JDBC_URL: jdbc:postgresql://postgres:5432/rockstars_dev
+
+      # Hibernate
+      QUARKUS_HIBERNATE_ORM_SCHEMA_MANAGEMENT_STRATEGY: none
+      QUARKUS_HIBERNATE_ORM_LOG_SQL: "false"
+
+      # Flyway
+      QUARKUS_FLYWAY_MIGRATE_AT_START: "true"
+
+      # MinIO
+      QUARKUS_MINIO_HOST: minio
+      QUARKUS_MINIO_PORT: "9000"
+      QUARKUS_MINIO_SECURE: "false"
+      QUARKUS_MINIO_ACCESS_KEY: rockstarsAccessKey2024
+      QUARKUS_MINIO_SECRET_KEY: R0ckst4rsS3cr3tK3y24
+      MINIO_BUCKET_ALBUM_COVERS: album-covers
+
+      # JWT
+      MP_JWT_VERIFY_PUBLICKEY_LOCATION: publicKey.pem
+      MP_JWT_VERIFY_ISSUER: https://rockstars.com.br
+      SMALLRYE_JWT_SIGN_KEY_LOCATION: privateKey.pem
+      SMALLRYE_JWT_NEW_TOKEN_LIFESPAN: "3600"
+
+      # Swagger - Habilitado para QA
+      QUARKUS_SWAGGER_UI_ALWAYS_INCLUDE: "true"
+      QUARKUS_SWAGGER_UI_PATH: /swagger-ui
+
+      # CORS
+      QUARKUS_HTTP_CORS: "true"
+      QUARKUS_HTTP_CORS_ORIGINS: "*"
+      QUARKUS_HTTP_CORS_METHODS: GET,POST,PUT,DELETE,PATCH,OPTIONS
+      QUARKUS_HTTP_CORS_HEADERS: Content-Type,Authorization,Accept,Origin,X-Requested-With
+
+      # REST Client
+      QUARKUS_REST_CLIENT_REGIONAL_API_URL: https://integrador-argus-api.geia.vip/v1
+
+      # Admin User Initialization
+      APP_ADMIN_USERNAME: rockstar
+      APP_ADMIN_PASSWORD: MyWay0rTh3H1ghw@y
+      APP_ADMIN_ENABLED: "true"
+
+      # Logging
+      QUARKUS_LOG_CONSOLE_ENABLED: "true"
+      QUARKUS_LOG_LEVEL: INFO
+    ports:
+      - "9001:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/q/health/ready"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - rockstars-network
+
+# =============================================================================
+# Networks
+# =============================================================================
+networks:
+  rockstars-network:
+    driver: bridge
+
+# =============================================================================
+# Volumes - Persistent Storage
+# =============================================================================
+volumes:
+  postgres_data:
+    driver: local
+  minio_data:
+    driver: local

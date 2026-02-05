@@ -1,5 +1,41 @@
-*
-!build/*-runner
-!build/*-runner.jar
-!build/lib/*
-!build/quarkus-app/*
+# =============================================================================
+# Docker Ignore - Rockstars App
+# =============================================================================
+
+# Git
+.git
+.gitignore
+
+# IDE
+.idea
+*.iml
+.vscode
+*.swp
+
+# Gradle cache
+.gradle
+
+# Build output (will be generated inside container)
+build
+
+# Temporary files
+temp
+*.tmp
+
+# Logs
+*.log
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docker files (avoid recursive copy)
+Dockerfile
+docker-compose.yaml
+docker-compose*.yaml
+.dockerignore

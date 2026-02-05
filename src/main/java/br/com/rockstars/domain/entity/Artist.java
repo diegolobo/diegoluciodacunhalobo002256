@@ -5,7 +5,10 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.util.HashSet;
 import java.util.Set;
@@ -26,6 +29,10 @@ public class Artist extends BaseEntity {
 
     @ManyToMany(mappedBy = "artists")
     private Set<Album> albums = new HashSet<>();
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "regional_id")
+    private Regional regional;
 
     public Artist() {
     }
@@ -66,5 +73,13 @@ public class Artist extends BaseEntity {
 
     public void setAlbums(Set<Album> albums) {
         this.albums = albums;
+    }
+
+    public Regional getRegional() {
+        return regional;
+    }
+
+    public void setRegional(Regional regional) {
+        this.regional = regional;
     }
 }

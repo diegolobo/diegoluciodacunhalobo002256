@@ -6,7 +6,6 @@ import br.com.rockstars.domain.dto.ArtistDTO;
 import br.com.rockstars.domain.dto.PageResponseDTO;
 import br.com.rockstars.domain.enums.ArtistType;
 import br.com.rockstars.service.AlbumService;
-import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
@@ -41,7 +40,7 @@ public class AlbumResource {
     AlbumService albumService;
 
     @GET
-    @PermitAll
+    @RolesAllowed({"ADMIN", "USER"})
     @Operation(summary = "Listar albums", description = "Retorna lista paginada de albums com filtros")
     @APIResponses({
         @APIResponse(responseCode = "200", description = "Lista de albums",
@@ -61,7 +60,7 @@ public class AlbumResource {
 
     @GET
     @Path("/{id}")
-    @PermitAll
+    @RolesAllowed({"ADMIN", "USER"})
     @Operation(summary = "Buscar album por ID", description = "Retorna um album pelo seu ID")
     @APIResponses({
         @APIResponse(responseCode = "200", description = "Album encontrado",
@@ -74,7 +73,7 @@ public class AlbumResource {
 
     @GET
     @Path("/{id}/artists")
-    @PermitAll
+    @RolesAllowed({"ADMIN", "USER"})
     @Operation(summary = "Listar artistas do album", description = "Retorna todos os artistas de um album")
     @APIResponses({
         @APIResponse(responseCode = "200", description = "Lista de artistas"),
@@ -85,7 +84,7 @@ public class AlbumResource {
     }
 
     @POST
-    @RolesAllowed({"admin"})
+    @RolesAllowed({"ADMIN"})
     @Operation(summary = "Criar album", description = "Cria um novo album")
     @APIResponses({
         @APIResponse(responseCode = "201", description = "Album criado",
@@ -101,7 +100,7 @@ public class AlbumResource {
 
     @PUT
     @Path("/{id}")
-    @RolesAllowed({"admin"})
+    @RolesAllowed({"ADMIN"})
     @Operation(summary = "Atualizar album", description = "Atualiza um album existente")
     @APIResponses({
         @APIResponse(responseCode = "200", description = "Album atualizado",
@@ -115,7 +114,7 @@ public class AlbumResource {
 
     @DELETE
     @Path("/{id}")
-    @RolesAllowed({"admin"})
+    @RolesAllowed({"ADMIN"})
     @Operation(summary = "Inativar album", description = "Inativa um album (soft delete)")
     @APIResponses({
         @APIResponse(responseCode = "204", description = "Album inativado"),
@@ -128,7 +127,7 @@ public class AlbumResource {
 
     @POST
     @Path("/{id}/artists/{artistId}")
-    @RolesAllowed({"admin"})
+    @RolesAllowed({"ADMIN"})
     @Operation(summary = "Associar artista ao album", description = "Adiciona um artista ao album")
     @APIResponses({
         @APIResponse(responseCode = "200", description = "Artista associado",
@@ -144,7 +143,7 @@ public class AlbumResource {
 
     @DELETE
     @Path("/{id}/artists/{artistId}")
-    @RolesAllowed({"admin"})
+    @RolesAllowed({"ADMIN"})
     @Operation(summary = "Remover artista do album", description = "Remove um artista do album")
     @APIResponses({
         @APIResponse(responseCode = "200", description = "Artista removido",

@@ -1,3 +1,5 @@
--- Senha: admin123 (hash BCrypt cost=10)
-INSERT INTO app_user (username, password, role, active) VALUES
-    ('admin', '$2a$10$rDkPvvAFV6kXTpTEOqcFOe3kPpHxNvAIe6x/FPK3L.G/S3sA7CBmO', 'admin', TRUE);
+-- Default admin user will be created by AdminUserInitializer on startup
+-- This migration is kept empty to maintain Flyway history
+-- Username and password are configured via environment variables:
+--   APP_ADMIN_USERNAME (default: admin)
+--   APP_ADMIN_PASSWORD (default: admin123)

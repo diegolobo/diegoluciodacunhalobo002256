@@ -9,6 +9,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.jwt.JsonWebToken;
+import jakarta.transaction.Transactional;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.HashSet;
@@ -49,6 +50,20 @@ public class AuthService {
         String username = jwt.getName();
         User user = userRepository.findByUsernameAndActive(username, true)
             .orElseThrow(() -> new BusinessException("Usuario nao encontrado ou inativo"));
+
+        String token = generateToken(user);
+        return TokenResponseDTO.of(token, tokenLifespan);
+    }
+
+    @Transactional
+    public TokenResponseDTO register(String username, String password) {
+        if (userRepository.findByUsername(username).isPresent()) {
+            throw new BusinessException("Username ja existe");
+        }
+
+        String hashedPassword = BcryptUtil.hash(password);
+        User user = new User(username, hashedPassword, "USER");
+        userRepository.persist(user);
 
         String token = generateToken(user);
         return TokenResponseDTO.of(token, tokenLifespan);

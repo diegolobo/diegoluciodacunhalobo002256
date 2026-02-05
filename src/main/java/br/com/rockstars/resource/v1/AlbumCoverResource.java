@@ -2,7 +2,6 @@ package br.com.rockstars.resource.v1;
 
 import br.com.rockstars.domain.dto.AlbumCoverDTO;
 import br.com.rockstars.service.AlbumCoverService;
-import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
@@ -37,7 +36,7 @@ public class AlbumCoverResource {
     AlbumCoverService albumCoverService;
 
     @GET
-    @PermitAll
+    @RolesAllowed({"ADMIN", "USER"})
     @Operation(summary = "Listar capas", description = "Retorna todas as capas de um album com URLs temporarias")
     @APIResponses({
         @APIResponse(responseCode = "200", description = "Lista de capas"),
@@ -49,7 +48,7 @@ public class AlbumCoverResource {
 
     @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
-    @RolesAllowed({"admin"})
+    @RolesAllowed({"ADMIN"})
     @Operation(summary = "Upload de capa", description = "Faz upload de uma capa para o album")
     @APIResponses({
         @APIResponse(responseCode = "201", description = "Capa enviada",
@@ -76,7 +75,7 @@ public class AlbumCoverResource {
     @POST
     @Path("/batch")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
-    @RolesAllowed({"admin"})
+    @RolesAllowed({"ADMIN"})
     @Operation(summary = "Upload multiplo de capas", description = "Faz upload de varias capas para o album")
     @APIResponses({
         @APIResponse(responseCode = "201", description = "Capas enviadas"),
@@ -103,7 +102,7 @@ public class AlbumCoverResource {
 
     @DELETE
     @Path("/{coverId}")
-    @RolesAllowed({"admin"})
+    @RolesAllowed({"ADMIN"})
     @Operation(summary = "Remover capa", description = "Remove uma capa do album")
     @APIResponses({
         @APIResponse(responseCode = "204", description = "Capa removida"),

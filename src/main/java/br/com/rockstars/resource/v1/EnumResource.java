@@ -1,7 +1,7 @@
 package br.com.rockstars.resource.v1;
 
 import br.com.rockstars.domain.enums.ArtistType;
-import jakarta.annotation.security.PermitAll;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
@@ -19,7 +19,7 @@ public class EnumResource {
 
     @GET
     @Path("/artist-types")
-    @PermitAll
+    @RolesAllowed({"ADMIN", "USER"})
     @Operation(summary = "Listar tipos de artista", description = "Retorna os valores possiveis para tipo de artista")
     @APIResponse(responseCode = "200", description = "Lista de tipos de artista")
     public List<ArtistType> getArtistTypes() {

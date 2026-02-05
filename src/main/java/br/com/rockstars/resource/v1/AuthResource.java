@@ -1,6 +1,7 @@
 package br.com.rockstars.resource.v1;
 
 import br.com.rockstars.domain.dto.LoginRequestDTO;
+import br.com.rockstars.domain.dto.RegisterRequestDTO;
 import br.com.rockstars.domain.dto.TokenResponseDTO;
 import br.com.rockstars.service.AuthService;
 import jakarta.annotation.security.PermitAll;
@@ -42,8 +43,21 @@ public class AuthResource {
     }
 
     @POST
+    @Path("/register")
+    @PermitAll
+    @Operation(summary = "Registrar usuario", description = "Registra um novo usuario com role USER")
+    @APIResponses({
+        @APIResponse(responseCode = "200", description = "Usuario registrado com sucesso",
+            content = @Content(schema = @Schema(implementation = TokenResponseDTO.class))),
+        @APIResponse(responseCode = "400", description = "Username ja existe ou dados invalidos")
+    })
+    public TokenResponseDTO register(@Valid RegisterRequestDTO request) {
+        return authService.register(request.getUsername(), request.getPassword());
+    }
+
+    @POST
     @Path("/refresh")
-    @RolesAllowed({"admin", "user"})
+    @RolesAllowed({"ADMIN", "USER"})
     @Operation(summary = "Renovar token", description = "Renova o token JWT do usuario autenticado")
     @APIResponses({
         @APIResponse(responseCode = "200", description = "Token renovado",

@@ -3,7 +3,6 @@ package br.com.rockstars.resource.v1;
 import br.com.rockstars.domain.dto.RegionalDTO;
 import br.com.rockstars.domain.dto.SyncResultDTO;
 import br.com.rockstars.service.RegionalSyncService;
-import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
@@ -30,7 +29,7 @@ public class RegionalResource {
     RegionalSyncService regionalSyncService;
 
     @GET
-    @PermitAll
+    @RolesAllowed({"ADMIN", "USER"})
     @Operation(summary = "Listar regionais", description = "Retorna todas as regionais ativas")
     @APIResponse(responseCode = "200", description = "Lista de regionais")
     public List<RegionalDTO> findAll() {
@@ -39,7 +38,7 @@ public class RegionalResource {
 
     @POST
     @Path("/sync")
-    @RolesAllowed({"admin"})
+    @RolesAllowed({"ADMIN"})
     @Operation(summary = "Sincronizar regionais", description = "Sincroniza regionais com endpoint externo")
     @APIResponses({
         @APIResponse(responseCode = "200", description = "Sincronizacao realizada",

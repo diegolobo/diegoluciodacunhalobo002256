@@ -6,7 +6,6 @@ import br.com.rockstars.domain.dto.ArtistRequestDTO;
 import br.com.rockstars.domain.dto.PageResponseDTO;
 import br.com.rockstars.domain.enums.ArtistType;
 import br.com.rockstars.service.ArtistService;
-import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
@@ -41,7 +40,7 @@ public class ArtistResource {
     ArtistService artistService;
 
     @GET
-    @PermitAll
+    @RolesAllowed({"ADMIN", "USER"})
     @Operation(summary = "Listar artistas", description = "Retorna lista paginada de artistas com filtros")
     @APIResponses({
         @APIResponse(responseCode = "200", description = "Lista de artistas",
@@ -53,14 +52,15 @@ public class ArtistResource {
             @Parameter(description = "Filtro por nome") @QueryParam("name") String name,
             @Parameter(description = "Filtro por tipo (SOLO, BAND)") @QueryParam("type") ArtistType type,
             @Parameter(description = "Filtro por status ativo") @QueryParam("active") Boolean active,
+            @Parameter(description = "Filtro por ID da regional") @QueryParam("regionalId") Long regionalId,
             @Parameter(description = "Campo para ordenacao") @QueryParam("sort") @DefaultValue("name") String sortField,
             @Parameter(description = "Direcao da ordenacao (asc, desc)") @QueryParam("direction") @DefaultValue("asc") String sortDirection) {
-        return artistService.findAll(page, size, name, type, active, sortField, sortDirection);
+        return artistService.findAll(page, size, name, type, active, regionalId, sortField, sortDirection);
     }
 
     @GET
     @Path("/{id}")
-    @PermitAll
+    @RolesAllowed({"ADMIN", "USER"})
     @Operation(summary = "Buscar artista por ID", description = "Retorna um artista pelo seu ID")
     @APIResponses({
         @APIResponse(responseCode = "200", description = "Artista encontrado",
@@ -73,7 +73,7 @@ public class ArtistResource {
 
     @GET
     @Path("/{id}/albums")
-    @PermitAll
+    @RolesAllowed({"ADMIN", "USER"})
     @Operation(summary = "Listar albuns do artista", description = "Retorna todos os albuns de um artista")
     @APIResponses({
         @APIResponse(responseCode = "200", description = "Lista de albuns"),
@@ -84,7 +84,7 @@ public class ArtistResource {
     }
 
     @POST
-    @RolesAllowed({"admin"})
+    @RolesAllowed({"ADMIN"})
     @Operation(summary = "Criar artista", description = "Cria um novo artista")
     @APIResponses({
         @APIResponse(responseCode = "201", description = "Artista criado",
@@ -100,7 +100,7 @@ public class ArtistResource {
 
     @PUT
     @Path("/{id}")
-    @RolesAllowed({"admin"})
+    @RolesAllowed({"ADMIN"})
     @Operation(summary = "Atualizar artista", description = "Atualiza um artista existente")
     @APIResponses({
         @APIResponse(responseCode = "200", description = "Artista atualizado",
@@ -114,7 +114,7 @@ public class ArtistResource {
 
     @DELETE
     @Path("/{id}")
-    @RolesAllowed({"admin"})
+    @RolesAllowed({"ADMIN"})
     @Operation(summary = "Inativar artista", description = "Inativa um artista (soft delete)")
     @APIResponses({
         @APIResponse(responseCode = "204", description = "Artista inativado"),

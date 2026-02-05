@@ -22,6 +22,10 @@ public class ArtistDTO {
 
     private Integer albumCount;
 
+    private Long regionalId;
+
+    private String regionalName;
+
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
@@ -46,6 +50,10 @@ public class ArtistDTO {
         dto.setType(artist.getType());
         dto.setActive(artist.getActive());
         dto.setAlbumCount(artist.getAlbums() != null ? artist.getAlbums().size() : 0);
+        if (artist.getRegional() != null) {
+            dto.setRegionalId(artist.getRegional().getId());
+            dto.setRegionalName(artist.getRegional().getName());
+        }
         dto.setCreatedAt(artist.getCreatedAt());
         dto.setUpdatedAt(artist.getUpdatedAt());
         return dto;
@@ -110,6 +118,22 @@ public class ArtistDTO {
 
     public void setAlbumCount(Integer albumCount) {
         this.albumCount = albumCount;
+    }
+
+    public Long getRegionalId() {
+        return regionalId;
+    }
+
+    public void setRegionalId(Long regionalId) {
+        this.regionalId = regionalId;
+    }
+
+    public String getRegionalName() {
+        return regionalName;
+    }
+
+    public void setRegionalName(String regionalName) {
+        this.regionalName = regionalName;
     }
 
     public LocalDateTime getCreatedAt() {

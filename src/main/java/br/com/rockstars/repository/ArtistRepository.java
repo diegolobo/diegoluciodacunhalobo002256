@@ -13,7 +13,7 @@ import java.util.Map;
 @ApplicationScoped
 public class ArtistRepository implements PanacheRepository<Artist> {
 
-    public PanacheQuery<Artist> findWithFilters(String name, ArtistType type, Boolean active, Sort sort) {
+    public PanacheQuery<Artist> findWithFilters(String name, ArtistType type, Boolean active, Long regionalId, Sort sort) {
         StringBuilder query = new StringBuilder("1=1");
         Map<String, Object> params = new HashMap<>();
 
@@ -30,12 +30,17 @@ public class ArtistRepository implements PanacheRepository<Artist> {
         if (active != null) {
             query.append(" AND active = :active");
             params.put("active", active);
+        }
+
+        if (regionalId != null) {
+            query.append(" AND regional.id = :regionalId");
+            params.put("regionalId", regionalId);
         }
 
         return find(query.toString(), sort, params);
     }
 
-    public long countWithFilters(String name, ArtistType type, Boolean active) {
+    public long countWithFilters(String name, ArtistType type, Boolean active, Long regionalId) {
         StringBuilder query = new StringBuilder("1=1");
         Map<String, Object> params = new HashMap<>();
 
@@ -52,6 +57,11 @@ public class ArtistRepository implements PanacheRepository<Artist> {
         if (active != null) {
             query.append(" AND active = :active");
             params.put("active", active);
+        }
+
+        if (regionalId != null) {
+            query.append(" AND regional.id = :regionalId");
+            params.put("regionalId", regionalId);
         }
 
         return count(query.toString(), params);

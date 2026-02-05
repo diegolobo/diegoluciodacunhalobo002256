@@ -40,7 +40,7 @@ services:
       - rockstars-network
   api:
     build:
-      context: .
+      context: ./back-end
       dockerfile: Dockerfile
     depends_on:
       postgres:

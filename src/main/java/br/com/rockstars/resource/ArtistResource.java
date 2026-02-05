@@ -6,6 +6,8 @@ import br.com.rockstars.domain.dto.ArtistRequestDTO;
 import br.com.rockstars.domain.dto.PageResponseDTO;
 import br.com.rockstars.domain.enums.ArtistType;
 import br.com.rockstars.service.ArtistService;
+import jakarta.annotation.security.PermitAll;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
@@ -31,6 +33,7 @@ public class ArtistResource {
     ArtistService artistService;
 
     @GET
+    @PermitAll
     public PageResponseDTO<ArtistDTO> findAll(
             @QueryParam("page") @DefaultValue("0") int page,
             @QueryParam("size") @DefaultValue("10") int size,
@@ -44,17 +47,20 @@ public class ArtistResource {
 
     @GET
     @Path("/{id}")
+    @PermitAll
     public ArtistDTO findById(@PathParam("id") Long id) {
         return artistService.findById(id);
     }
 
     @GET
     @Path("/{id}/albums")
+    @PermitAll
     public List<AlbumDTO> findAlbumsByArtistId(@PathParam("id") Long id) {
         return artistService.findAlbumsByArtistId(id);
     }
 
     @POST
+    @RolesAllowed({"admin"})
     public Response create(@Valid ArtistRequestDTO dto) {
         ArtistDTO created = artistService.create(dto);
         return Response.status(Response.Status.CREATED).entity(created).build();
@@ -62,12 +68,14 @@ public class ArtistResource {
 
     @PUT
     @Path("/{id}")
+    @RolesAllowed({"admin"})
     public ArtistDTO update(@PathParam("id") Long id, @Valid ArtistRequestDTO dto) {
         return artistService.update(id, dto);
     }
 
     @DELETE
     @Path("/{id}")
+    @RolesAllowed({"admin"})
     public Response delete(@PathParam("id") Long id) {
         artistService.delete(id);
         return Response.noContent().build();

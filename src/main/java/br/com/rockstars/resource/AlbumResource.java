@@ -6,6 +6,8 @@ import br.com.rockstars.domain.dto.ArtistDTO;
 import br.com.rockstars.domain.dto.PageResponseDTO;
 import br.com.rockstars.domain.enums.ArtistType;
 import br.com.rockstars.service.AlbumService;
+import jakarta.annotation.security.PermitAll;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
@@ -31,6 +33,7 @@ public class AlbumResource {
     AlbumService albumService;
 
     @GET
+    @PermitAll
     public PageResponseDTO<AlbumDTO> findAll(
             @QueryParam("page") @DefaultValue("0") int page,
             @QueryParam("size") @DefaultValue("10") int size,
@@ -45,17 +48,20 @@ public class AlbumResource {
 
     @GET
     @Path("/{id}")
+    @PermitAll
     public AlbumDTO findById(@PathParam("id") Long id) {
         return albumService.findById(id);
     }
 
     @GET
     @Path("/{id}/artists")
+    @PermitAll
     public List<ArtistDTO> findArtistsByAlbumId(@PathParam("id") Long id) {
         return albumService.findArtistsByAlbumId(id);
     }
 
     @POST
+    @RolesAllowed({"admin"})
     public Response create(@Valid AlbumRequestDTO dto) {
         AlbumDTO created = albumService.create(dto);
         return Response.status(Response.Status.CREATED).entity(created).build();
@@ -63,12 +69,14 @@ public class AlbumResource {
 
     @PUT
     @Path("/{id}")
+    @RolesAllowed({"admin"})
     public AlbumDTO update(@PathParam("id") Long id, @Valid AlbumRequestDTO dto) {
         return albumService.update(id, dto);
     }
 
     @DELETE
     @Path("/{id}")
+    @RolesAllowed({"admin"})
     public Response delete(@PathParam("id") Long id) {
         albumService.delete(id);
         return Response.noContent().build();
@@ -76,12 +84,14 @@ public class AlbumResource {
 
     @POST
     @Path("/{id}/artists/{artistId}")
+    @RolesAllowed({"admin"})
     public AlbumDTO addArtist(@PathParam("id") Long albumId, @PathParam("artistId") Long artistId) {
         return albumService.addArtistToAlbum(albumId, artistId);
     }
 
     @DELETE
     @Path("/{id}/artists/{artistId}")
+    @RolesAllowed({"admin"})
     public AlbumDTO removeArtist(@PathParam("id") Long albumId, @PathParam("artistId") Long artistId) {
         return albumService.removeArtistFromAlbum(albumId, artistId);
     }

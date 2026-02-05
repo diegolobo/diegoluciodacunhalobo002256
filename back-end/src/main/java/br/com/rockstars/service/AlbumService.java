@@ -77,7 +77,7 @@ public class AlbumService {
     @Transactional
     public AlbumDTO create(AlbumRequestDTO dto) {
         Album album = dto.toEntity();
-        albumRepository.persist(album);
+        albumRepository.persistAndFlush(album);
         AlbumDTO result = addPresignedUrls(AlbumDTO.fromEntity(album));
         notificationSocket.broadcast(AlbumNotificationDTO.created(result));
         return result;

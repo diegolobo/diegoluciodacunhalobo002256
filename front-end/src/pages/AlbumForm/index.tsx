@@ -2,6 +2,7 @@ import { useState, useEffect, FormEvent, ChangeEvent } from 'react'
 import { useNavigate, useParams, useSearchParams, Link } from 'react-router-dom'
 import Layout from '../../components/Layout'
 import { InputField, CheckboxField } from '../../components/ui/FormField'
+import ConfirmModal from '../../components/ui/ConfirmModal'
 import { albumFacade } from '../../facades/album.facade'
 import { artistFacade } from '../../facades/artist.facade'
 import type { Artist, AlbumCover } from '../../types'
@@ -31,6 +32,8 @@ function AlbumForm() {
   const [isLoading, setIsLoading] = useState(false)
   const [isLoadingData, setIsLoadingData] = useState(true)
   const [submitError, setSubmitError] = useState<string | null>(null)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   useEffect(() => {
     carregarArtistas()
@@ -128,6 +131,22 @@ function AlbumForm() {
     return Object.keys(newErrors).length === 0
   }
 
+  const handleDesativarAlbum = async () => {
+    if (!id) return
+
+    setIsDeleting(true)
+    try {
+      await albumFacade.excluir(Number(id))
+      setShowDeleteModal(false)
+      setIsDeleting(false)
+      setActive(false)
+    } catch {
+      setSubmitError('Erro ao desativar álbum.')
+      setIsDeleting(false)
+      setShowDeleteModal(false)
+    }
+  }
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     setSubmitError(null)
@@ -214,9 +233,29 @@ function AlbumForm() {
         </div>
 
         <div className="bg-white dark:bg-dark-600 rounded-xl shadow-md p-6">
-          <h1 className="text-2xl font-bold text-dark-800 dark:text-cream-100 mb-6">
-            {isEditing ? 'Editar Álbum' : 'Novo Álbum'}
-          </h1>
+          <div className="flex items-center justify-between mb-6">
+            <h1 className="text-2xl font-bold text-dark-800 dark:text-cream-100">
+              {isEditing ? 'Editar Álbum' : 'Novo Álbum'}
+            </h1>
+            {isEditing && active && (
+              <button
+                type="button"
+                onClick={() => setShowDeleteModal(true)}
+                disabled={isLoading || isDeleting}
+                className="inline-flex items-center px-4 py-2 border-2 border-amber-500 text-amber-500 hover:bg-amber-500 hover:text-white disabled:opacity-50 rounded-lg transition-colors cursor-pointer"
+              >
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"
+                  />
+                </svg>
+                Desativar
+              </button>
+            )}
+          </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <InputField
@@ -365,6 +404,18 @@ function AlbumForm() {
           </form>
         </div>
       </div>
+
+      <ConfirmModal
+        isOpen={showDeleteModal}
+        title="Desativar Álbum"
+        message={`Deseja realmente desativar o álbum "${title}"? O álbum ficará inativo e não aparecerá nas listagens principais.`}
+        confirmText="Desativar"
+        cancelText="Cancelar"
+        onConfirm={handleDesativarAlbum}
+        onCancel={() => setShowDeleteModal(false)}
+        isLoading={isDeleting}
+        variant="warning"
+      />
     </Layout>
   )
 }

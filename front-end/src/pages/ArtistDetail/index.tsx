@@ -1,17 +1,21 @@
 import { useState, useEffect } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useNavigate } from 'react-router-dom'
 import Layout from '../../components/Layout'
 import AlbumCard from '../../components/ui/AlbumCard'
+import ConfirmModal from '../../components/ui/ConfirmModal'
 import { artistFacade } from '../../facades/artist.facade'
 import type { Artist, Album } from '../../types'
 
 function ArtistDetail() {
   const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
 
   const [artist, setArtist] = useState<Artist | null>(null)
   const [albums, setAlbums] = useState<Album[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
 
   useEffect(() => {
     if (id) {
@@ -35,6 +39,22 @@ function ArtistDetail() {
       setError('Erro ao carregar dados do artista.')
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const handleDesativarArtista = async () => {
+    if (!artist) return
+
+    setIsDeleting(true)
+    try {
+      await artistFacade.excluir(artist.id)
+      setShowDeleteModal(false)
+      setIsDeleting(false)
+      carregarDados(artist.id)
+    } catch {
+      setError('Erro ao desativar artista.')
+      setIsDeleting(false)
+      setShowDeleteModal(false)
     }
   }
 
@@ -111,20 +131,39 @@ function ArtistDetail() {
                 <span>{artist.albumCount} {artist.albumCount === 1 ? 'álbum' : 'álbuns'}</span>
               </div>
             </div>
-            <Link
-              to={`/artistas/${artist.id}/editar`}
-              className="inline-flex items-center justify-center px-4 py-2 border-2 border-accent-gold text-accent-gold hover:bg-accent-gold hover:text-white rounded-lg transition-colors cursor-pointer"
-            >
-              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                />
-              </svg>
-              Editar
-            </Link>
+            <div className="flex gap-2">
+              <Link
+                to={`/artistas/${artist.id}/editar`}
+                className="inline-flex items-center justify-center px-4 py-2 border-2 border-accent-gold text-accent-gold hover:bg-accent-gold hover:text-white rounded-lg transition-colors cursor-pointer"
+              >
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                  />
+                </svg>
+                Editar
+              </Link>
+              {artist.active && (
+                <button
+                  onClick={() => setShowDeleteModal(true)}
+                  disabled={isDeleting}
+                  className="inline-flex items-center justify-center px-4 py-2 border-2 border-amber-500 text-amber-500 hover:bg-amber-500 hover:text-white disabled:opacity-50 rounded-lg transition-colors cursor-pointer"
+                >
+                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"
+                    />
+                  </svg>
+                  {isDeleting ? 'Desativando...' : 'Desativar'}
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
@@ -178,6 +217,18 @@ function ArtistDetail() {
           )}
         </div>
       </div>
+
+      <ConfirmModal
+        isOpen={showDeleteModal}
+        title="Desativar Artista"
+        message={`Deseja realmente desativar o artista "${artist?.name}"? O artista ficará inativo e não aparecerá nas listagens principais.`}
+        confirmText="Desativar"
+        cancelText="Cancelar"
+        onConfirm={handleDesativarArtista}
+        onCancel={() => setShowDeleteModal(false)}
+        isLoading={isDeleting}
+        variant="warning"
+      />
     </Layout>
   )
 }

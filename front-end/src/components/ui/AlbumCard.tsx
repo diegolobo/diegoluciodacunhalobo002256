@@ -3,16 +3,34 @@ import type { Album } from '../../types'
 
 interface AlbumCardProps {
   album: Album
+  onDelete?: (albumId: number, albumTitle: string) => void
 }
 
-function AlbumCard({ album }: AlbumCardProps) {
+function AlbumCard({ album, onDelete }: AlbumCardProps) {
   const coverUrl = album.covers?.[0]?.presignedUrl
+
+  const handleDelete = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    onDelete?.(album.id, album.title)
+  }
 
   return (
     <Link
       to={`/albuns/${album.id}/editar`}
-      className="block rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-all cursor-pointer group"
+      className="block rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-all cursor-pointer group relative"
     >
+      {onDelete && (
+        <button
+          onClick={handleDelete}
+          className="absolute top-2 right-2 z-10 p-2 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer hover:bg-red-600"
+          title="Excluir álbum"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      )}
       <div className="relative aspect-square bg-dark-700">
         {coverUrl ? (
           <img

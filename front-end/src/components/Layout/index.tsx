@@ -1,12 +1,16 @@
 import { ReactNode } from 'react'
 import Header from '../Header'
 import Footer from '../Footer'
+import NotificationToast from '../ui/NotificationToast'
+import { useWebSocket } from '../../hooks/useWebSocket'
 
 interface LayoutProps {
   children: ReactNode
 }
 
 function Layout({ children }: LayoutProps) {
+  const { lastNotification, clearNotification } = useWebSocket()
+
   return (
     <div className="min-h-screen flex flex-col bg-cream-100 dark:bg-dark-800 transition-colors">
       <Header />
@@ -14,6 +18,7 @@ function Layout({ children }: LayoutProps) {
         {children}
       </main>
       <Footer />
+      <NotificationToast notification={lastNotification} onClose={clearNotification} />
     </div>
   )
 }

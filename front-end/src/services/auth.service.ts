@@ -1,9 +1,19 @@
 import api from './api'
 import type { LoginRequest, TokenResponse, TokenPayload, User } from '../types'
 
+export interface RegisterRequest {
+  username: string
+  password: string
+}
+
 export const authService = {
   async login(credentials: LoginRequest): Promise<TokenResponse> {
     const response = await api.post<TokenResponse>('/api/v1/auth/login', credentials)
+    return response.data
+  },
+
+  async register(data: RegisterRequest): Promise<TokenResponse> {
+    const response = await api.post<TokenResponse>('/api/v1/auth/register', data)
     return response.data
   },
 

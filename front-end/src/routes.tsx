@@ -3,6 +3,7 @@ import { Routes, Route } from 'react-router-dom'
 import PrivateRoute from './components/PrivateRoute'
 
 const Login = lazy(() => import('./pages/Login'))
+const Register = lazy(() => import('./pages/Register'))
 const Home = lazy(() => import('./pages/Home'))
 const ArtistDetail = lazy(() => import('./pages/ArtistDetail'))
 const ArtistForm = lazy(() => import('./pages/ArtistForm'))
@@ -21,6 +22,7 @@ function AppRoutes() {
     <Suspense fallback={<Loading />}>
       <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/cadastro" element={<Register />} />
         <Route
           path="/"
           element={

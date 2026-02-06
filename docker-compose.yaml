@@ -2,17 +2,17 @@ services:
   postgres:
     image: 'postgres:16-alpine'
     environment:
-      POSTGRES_USER: sa_rockstar
-      POSTGRES_PASSWORD: R0ckst4rs9x
-      POSTGRES_DB: rockstars_dev
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - 'postgres_data:/var/lib/postgresql/data'
     ports:
-    - '5432:5432'
+      - '${POSTGRES_PORT:-5432}:5432'
     healthcheck:
       test:
         - CMD-SHELL
-        - 'pg_isready -U sa_rockstar -d rockstars_dev'
+        - 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}'
       interval: 10s
       timeout: 5s
       retries: 5
@@ -23,8 +23,8 @@ services:
     image: 'minio/minio:latest'
     command: 'server /data --console-address ":9001"'
     environment:
-      MINIO_ROOT_USER: rockstarsAccessKey2024
-      MINIO_ROOT_PASSWORD: R0ckst4rsS3cr3tK3y24
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
     volumes:
       - 'minio_data:/data'
     healthcheck:
@@ -38,6 +38,7 @@ services:
       retries: 5
     networks:
       - rockstars-network
+
   api:
     build:
       context: ./back-end
@@ -48,38 +49,46 @@ services:
       minio:
         condition: service_healthy
     environment:
+      # Database
       QUARKUS_DATASOURCE_DB_KIND: postgresql
-      QUARKUS_DATASOURCE_USERNAME: sa_rockstar
-      QUARKUS_DATASOURCE_PASSWORD: R0ckst4rs9x
-      QUARKUS_DATASOURCE_JDBC_URL: 'jdbc:postgresql://postgres:5432/rockstars_dev'
+      QUARKUS_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      QUARKUS_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      QUARKUS_DATASOURCE_JDBC_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
       QUARKUS_HIBERNATE_ORM_SCHEMA_MANAGEMENT_STRATEGY: none
-      QUARKUS_HIBERNATE_ORM_LOG_SQL: 'false'
+      QUARKUS_HIBERNATE_ORM_LOG_SQL: ${DB_LOG_SQL:-false}
       QUARKUS_FLYWAY_MIGRATE_AT_START: 'true'
+      # MinIO
       QUARKUS_MINIO_HOST: minio
       QUARKUS_MINIO_PORT: '9000'
       QUARKUS_MINIO_SECURE: 'false'
-      QUARKUS_MINIO_ACCESS_KEY: rockstarsAccessKey2024
-      QUARKUS_MINIO_SECRET_KEY: R0ckst4rsS3cr3tK3y24
-      MINIO_BUCKET_ALBUM_COVERS: album-covers
-      MINIO_PUBLIC_URL: 'https://minio.dots.dev.br'
+      QUARKUS_MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      QUARKUS_MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+      MINIO_BUCKET_ALBUM_COVERS: ${MINIO_BUCKET:-album-covers}
+      MINIO_PUBLIC_URL: ${MINIO_PUBLIC_URL}
+      # JWT
       MP_JWT_VERIFY_PUBLICKEY_LOCATION: publicKey.pem
-      MP_JWT_VERIFY_ISSUER: 'https://rockstars.com.br'
+      MP_JWT_VERIFY_ISSUER: ${JWT_ISSUER:-https://rockstars.com.br}
       SMALLRYE_JWT_SIGN_KEY_LOCATION: privateKey.pem
-      SMALLRYE_JWT_NEW_TOKEN_LIFESPAN: '3600'
-      QUARKUS_SWAGGER_UI_ALWAYS_INCLUDE: 'true'
+      SMALLRYE_JWT_NEW_TOKEN_LIFESPAN: ${JWT_LIFESPAN:-3600}
+      # Admin
+      APP_ADMIN_USERNAME: ${ADMIN_USERNAME}
+      APP_ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      APP_ADMIN_ENABLED: ${ADMIN_ENABLED:-true}
+      # Swagger
+      QUARKUS_SWAGGER_UI_ALWAYS_INCLUDE: ${SWAGGER_ENABLED:-true}
       QUARKUS_SWAGGER_UI_PATH: /swagger-ui
+      # CORS
       QUARKUS_HTTP_CORS: 'true'
-      QUARKUS_HTTP_CORS_ORIGINS: '*'
+      QUARKUS_HTTP_CORS_ORIGINS: ${CORS_ORIGINS:-*}
       QUARKUS_HTTP_CORS_METHODS: 'GET,POST,PUT,DELETE,PATCH,OPTIONS'
       QUARKUS_HTTP_CORS_HEADERS: 'Content-Type,Authorization,Accept,Origin,X-Requested-With'
-      QUARKUS_REST_CLIENT_REGIONAL_API_URL: 'https://integrador-argus-api.geia.vip/v1'
-      APP_ADMIN_USERNAME: rockstar
-      APP_ADMIN_PASSWORD: MyWay0rTh3H1ghw@y
-      APP_ADMIN_ENABLED: 'true'
+      # External APIs
+      QUARKUS_REST_CLIENT_REGIONAL_API_URL: ${REGIONAL_API_URL:-https://integrador-argus-api.geia.vip/v1}
+      # Logging
       QUARKUS_LOG_CONSOLE_ENABLED: 'true'
-      QUARKUS_LOG_LEVEL: INFO
+      QUARKUS_LOG_LEVEL: ${LOG_LEVEL:-INFO}
     ports:
-      - '3000:8080'
+      - '${API_PORT:-3000}:8080'
     healthcheck:
       test:
         - CMD
@@ -90,6 +99,20 @@ services:
       timeout: 10s
       retries: 5
       start_period: 60s
+    networks:
+      - rockstars-network
+
+  frontend:
+    build:
+      context: ./front-end
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL}
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - '${FRONTEND_PORT:-8080}:80'
     networks:
       - rockstars-network
 

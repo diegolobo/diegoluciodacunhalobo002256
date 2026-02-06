@@ -18,7 +18,7 @@ Sistema fullstack para gerenciamento de artistas e álbuns musicais, com suporte
 
 | Ambiente | URL |
 |----------|-----|
-| **Frontend** |  |
+| **Frontend** | [https://rockstars.dots.dev.br](https://rockstars.dots.dev.br) |
 | **API Backend** | [https://rockstars-api.dots.dev.br](https://rockstars-api.dots.dev.br) |
 | **Swagger UI** | [https://rockstars-api.dots.dev.br/swagger-ui](https://rockstars-api.dots.dev.br/swagger-ui) |
 

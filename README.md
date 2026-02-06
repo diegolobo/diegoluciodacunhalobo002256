@@ -1,81 +1,383 @@
-# rockstars-app
+# Rockstars App - Sistema de Gerenciamento de Artistas e Álbuns
 
-This project uses Quarkus, the Supersonic Subatomic Java Framework.
+Sistema fullstack para gerenciamento de artistas e álbuns musicais, com suporte a upload de capas, notificações em tempo real e categorização regional.
 
-If you want to learn more about Quarkus, please visit its website: <https://quarkus.io/>.
+---
 
-## Running the application in dev mode
+## Informações do Candidato
 
-You can run your application in dev mode that enables live coding using:
+| Campo | Informação |
+|-------|------------|
+| **Número de Inscrição** | 16346 |
+| **Nome** | Diego Lucio da Cunha Lobo |
+| **Cargo** | Analista de Tecnologia da Informação (Engenheiro de Computação Sênior) |
 
-```shell script
+---
+
+## Demonstração
+
+| Ambiente | URL |
+|----------|-----|
+| **Frontend** |  |
+| **API Backend** | [https://rockstars-api.dots.dev.br](https://rockstars-api.dots.dev.br) |
+| **Swagger UI** | [https://rockstars-api.dots.dev.br/swagger-ui](https://rockstars-api.dots.dev.br/swagger-ui) |
+
+### Credenciais de Teste
+
+```
+Usuário: rockstar
+Senha: MyWay0rTh3H1ghw@y
+```
+
+---
+
+## Funcionalidades
+
+### Backend (API REST)
+
+- ✅ **Autenticação JWT** com refresh token automático
+- ✅ **CRUD de Artistas** com paginação, busca e ordenação
+- ✅ **CRUD de Álbuns** com associação N:N com artistas
+- ✅ **Upload de Capas** via MinIO (S3-compatible)
+- ✅ **WebSocket** para notificações em tempo real
+- ✅ **Rate Limiting** (10 requisições/minuto)
+- ✅ **Documentação Swagger/OpenAPI**
+- ✅ **Sincronização de Regionais** via API externa
+- ✅ **Soft Delete** para artistas e álbuns
+- ✅ **Controle de Acesso** baseado em roles (ADMIN/USER)
+
+### Frontend (SPA React)
+
+- ✅ **Autenticação JWT** com renovação automática
+- ✅ **Listagem de Artistas** com busca, ordenação e paginação
+- ✅ **Detalhamento de Artistas** com álbuns associados
+- ✅ **Cadastro/Edição** de artistas e álbuns
+- ✅ **Upload de Capas** com preview
+- ✅ **Notificações em Tempo Real** via WebSocket
+- ✅ **Tema Claro/Escuro**
+- ✅ **Layout Responsivo** (mobile-first)
+- ✅ **Lazy Loading** de rotas
+
+---
+
+## Stack Tecnológica
+
+### Backend
+
+| Tecnologia | Versão | Descrição |
+|------------|--------|-----------|
+| **Quarkus** | 3.31.1 | Framework Java supersônico |
+| **Java** | 21 | Linguagem de programação |
+| **PostgreSQL** | 16 | Banco de dados relacional |
+| **Hibernate/Panache** | - | ORM e padrão Active Record |
+| **SmallRye JWT** | - | Autenticação JWT |
+| **MinIO** | Latest | Object Storage (S3-compatible) |
+| **Flyway** | - | Migrações de banco de dados |
+| **Bucket4j** | 1.0.7 | Rate Limiting |
+| **BCrypt** | 0.4 | Hash de senhas |
+
+### Frontend
+
+| Tecnologia | Versão | Descrição |
+|------------|--------|-----------|
+| **React** | 19.2.0 | Biblioteca UI |
+| **TypeScript** | 5.9.3 | Tipagem estática |
+| **Vite** | 7.2.4 | Build tool |
+| **Tailwind CSS** | 4.1.18 | Framework CSS |
+| **React Router** | 7.13.0 | Roteamento SPA |
+| **Axios** | 1.9.0 | Cliente HTTP |
+| **Vitest** | 3.2.4 | Framework de testes |
+
+### Infraestrutura
+
+| Tecnologia | Descrição |
+|------------|-----------|
+| **Docker** | Containerização |
+| **Docker Compose** | Orquestração de containers |
+| **Nginx** | Servidor web para frontend |
+| **Netlify** | Deploy do frontend |
+
+---
+
+## Arquitetura
+
+Para detalhes completos da arquitetura, consulte [ARCHITECTURE.md](./ARCHITECTURE.md).
+
+### Visão Geral
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                         FRONTEND                                 │
+│  React 19 + TypeScript + Vite + Tailwind CSS                    │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐              │
+│  │   Pages     │  │  Components │  │  Contexts   │              │
+│  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘              │
+│         └────────────────┼────────────────┘                      │
+│                    ┌─────┴─────┐                                 │
+│                    │  Facades  │                                 │
+│                    └─────┬─────┘                                 │
+│                    ┌─────┴─────┐                                 │
+│                    │ Services  │                                 │
+│                    └─────┬─────┘                                 │
+└──────────────────────────┼──────────────────────────────────────┘
+                           │ HTTP/WebSocket
+┌──────────────────────────┼──────────────────────────────────────┐
+│                     BACKEND API                                  │
+│  Quarkus 3.31 + Java 21 + JWT + WebSocket                       │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐              │
+│  │  Resources  │  │  Services   │  │ Repositories│              │
+│  │  (REST API) │  │  (Business) │  │   (Data)    │              │
+│  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘              │
+└─────────┼────────────────┼────────────────┼─────────────────────┘
+          │                │                │
+┌─────────┼────────────────┼────────────────┼─────────────────────┐
+│         │           INFRAESTRUTURA        │                      │
+│  ┌──────┴──────┐  ┌──────┴──────┐  ┌──────┴──────┐              │
+│  │ PostgreSQL  │  │    MinIO    │  │  External   │              │
+│  │   (Data)    │  │  (Storage)  │  │    APIs     │              │
+│  └─────────────┘  └─────────────┘  └─────────────┘              │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Estrutura do Projeto
+
+```
+rockstars-app/
+├── back-end/                    # API Backend (Quarkus)
+│   ├── src/main/java/          # Código fonte Java
+│   │   └── br/com/rockstars/
+│   │       ├── client/         # Clientes REST externos
+│   │       ├── config/         # Configurações e inicialização
+│   │       ├── domain/         # DTOs, Entities, Enums
+│   │       ├── exception/      # Tratamento de exceções
+│   │       ├── repository/     # Repositórios de dados
+│   │       ├── resource/v1/    # Endpoints REST
+│   │       ├── service/        # Lógica de negócio
+│   │       └── websocket/      # WebSocket handlers
+│   ├── src/main/resources/
+│   │   ├── db/migration/       # Migrações Flyway
+│   │   └── application.properties
+│   ├── Dockerfile
+│   └── build.gradle
+│
+├── front-end/                   # Frontend (React)
+│   ├── src/
+│   │   ├── components/         # Componentes React
+│   │   │   ├── ui/             # Componentes de UI reutilizáveis
+│   │   │   ├── Header/
+│   │   │   ├── Footer/
+│   │   │   └── Layout/
+│   │   ├── contexts/           # AuthContext, ThemeContext
+│   │   ├── facades/            # Camada de abstração
+│   │   ├── hooks/              # Custom hooks
+│   │   ├── pages/              # Páginas da aplicação
+│   │   ├── services/           # Serviços HTTP
+│   │   ├── types/              # Tipos TypeScript
+│   │   └── test/               # Configuração de testes
+│   ├── Dockerfile
+│   ├── nginx.conf
+│   └── package.json
+│
+├── docker-compose.yaml          # Orquestração de containers
+├── .env.example                 # Template de variáveis de ambiente
+├── README.md                    # Este arquivo
+└── ARCHITECTURE.md              # Documentação de arquitetura
+```
+
+---
+
+## Instalação e Execução
+
+### Pré-requisitos
+
+- Docker e Docker Compose
+- Node.js 22+ (para desenvolvimento frontend)
+- Java 21+ e Gradle (para desenvolvimento backend)
+
+### Execução com Docker Compose
+
+```bash
+# 1. Clone o repositório
+git clone https://github.com/diegolobo/diegoluciodacunhalobo002256.git
+cd rockstars-app
+
+# 2. Configure as variáveis de ambiente
+cp .env.example .env
+# Edite o arquivo .env com suas configurações
+
+# 3. Inicie todos os serviços
+docker-compose up -d --build
+
+# 4. Acesse a aplicação
+# Frontend: http://localhost:8080
+# Backend API: http://localhost:3000
+# Swagger UI: http://localhost:3000/swagger-ui
+```
+
+### Desenvolvimento Local
+
+#### Backend
+
+```bash
+cd back-end
+
+# Modo desenvolvimento com live reload
 ./gradlew quarkusDev
-```
 
-> **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only at <http://localhost:8080/q/dev/>.
-
-## Packaging and running the application
-
-The application can be packaged using:
-
-```shell script
+# Build para produção
 ./gradlew build
+
+# Executar testes
+./gradlew test
 ```
 
-It produces the `quarkus-run.jar` file in the `build/quarkus-app/` directory.
-Be aware that it’s not an _über-jar_ as the dependencies are copied into the `build/quarkus-app/lib/` directory.
+#### Frontend
 
-The application is now runnable using `java -jar build/quarkus-app/quarkus-run.jar`.
+```bash
+cd front-end
 
-If you want to build an _über-jar_, execute the following command:
+# Instalar dependências
+npm install
 
-```shell script
-./gradlew build -Dquarkus.package.jar.type=uber-jar
+# Modo desenvolvimento
+npm run dev
+
+# Build para produção
+npm run build
+
+# Executar testes
+npm run test:run
+
+# Linting
+npm run lint
 ```
 
-The application, packaged as an _über-jar_, is now runnable using `java -jar build/*-runner.jar`.
+---
 
-## Creating a native executable
+## API Endpoints
 
-You can create a native executable using:
+### Autenticação
 
-```shell script
-./gradlew build -Dquarkus.native.enabled=true
+| Método | Endpoint | Descrição | Auth |
+|--------|----------|-----------|------|
+| POST | `/api/v1/auth/login` | Login do usuário | Não |
+| POST | `/api/v1/auth/register` | Registro de usuário | Não |
+| POST | `/api/v1/auth/refresh` | Renovar token | Sim |
+
+### Artistas
+
+| Método | Endpoint | Descrição | Auth |
+|--------|----------|-----------|------|
+| GET | `/api/v1/artists` | Listar artistas | Sim |
+| GET | `/api/v1/artists/{id}` | Buscar artista | Sim |
+| GET | `/api/v1/artists/{id}/albums` | Álbuns do artista | Sim |
+| POST | `/api/v1/artists` | Criar artista | ADMIN |
+| PUT | `/api/v1/artists/{id}` | Atualizar artista | ADMIN |
+| DELETE | `/api/v1/artists/{id}` | Desativar artista | ADMIN |
+
+### Álbuns
+
+| Método | Endpoint | Descrição | Auth |
+|--------|----------|-----------|------|
+| GET | `/api/v1/albums` | Listar álbuns | Sim |
+| GET | `/api/v1/albums/{id}` | Buscar álbum | Sim |
+| POST | `/api/v1/albums` | Criar álbum | ADMIN |
+| PUT | `/api/v1/albums/{id}` | Atualizar álbum | ADMIN |
+| DELETE | `/api/v1/albums/{id}` | Desativar álbum | ADMIN |
+| POST | `/api/v1/albums/{id}/artists/{artistId}` | Vincular artista | ADMIN |
+| DELETE | `/api/v1/albums/{id}/artists/{artistId}` | Desvincular artista | ADMIN |
+
+### Capas de Álbum
+
+| Método | Endpoint | Descrição | Auth |
+|--------|----------|-----------|------|
+| GET | `/api/v1/albums/{id}/covers` | Listar capas | Sim |
+| POST | `/api/v1/albums/{id}/covers` | Upload de capa | ADMIN |
+| DELETE | `/api/v1/albums/{id}/covers/{coverId}` | Remover capa | ADMIN |
+
+---
+
+## Testes
+
+### Backend (JUnit 5 + REST Assured)
+
+```bash
+cd back-end
+./gradlew test
 ```
 
-Or, if you don't have GraalVM installed, you can run the native executable build in a container using:
+### Frontend (Vitest + React Testing Library)
 
-```shell script
-./gradlew build -Dquarkus.native.enabled=true -Dquarkus.native.container-build=true
+```bash
+cd front-end
+
+# Executar testes
+npm run test:run
+
+# Testes com coverage
+npm run test:coverage
 ```
 
-You can then execute your native executable with: `./build/rockstars-app-1.0.0-SNAPSHOT-runner`
+**Cobertura de Testes Frontend:**
+- Serviços de autenticação
+- Facades de autenticação
+- Componentes de Login
+- Página Home (listagem)
+- PrivateRoute (proteção de rotas)
 
-If you want to learn more about building native executables, please consult <https://quarkus.io/guides/gradle-tooling>.
+---
 
-## Related Guides
+## Deploy
 
-- REST resources for Hibernate ORM with Panache ([guide](https://quarkus.io/guides/rest-data-panache)): Generate Jakarta REST resources for your Hibernate Panache entities and repositories
-- REST ([guide](https://quarkus.io/guides/rest)): A Jakarta REST implementation utilizing build time processing and Vert.x. This extension is not compatible with the quarkus-resteasy extension, or any of the extensions that depend on it.
-- Bucket4j ([guide](https://quarkiverse.github.io/quarkiverse-docs/quarkus-bucket4j/dev/index.html)): Control the request rate sent to your application
-- Flyway ([guide](https://quarkus.io/guides/flyway)): Handle your database schema migrations
-- SmallRye OpenAPI ([guide](https://quarkus.io/guides/openapi-swaggerui)): Document your REST APIs with OpenAPI - comes with Swagger UI
-- REST Jackson ([guide](https://quarkus.io/guides/rest#json-serialisation)): Jackson serialization support for Quarkus REST. This extension is not compatible with the quarkus-resteasy extension, or any of the extensions that depend on it
-- SmallRye JWT ([guide](https://quarkus.io/guides/security-jwt)): Secure your applications with JSON Web Token
-- SmallRye JWT Build ([guide](https://quarkus.io/guides/security-jwt-build)): Create JSON Web Token with SmallRye JWT Build API
-- JDBC Driver - PostgreSQL ([guide](https://quarkus.io/guides/datasource)): Connect to the PostgreSQL database via JDBC
+### Frontend (Netlify)
 
-## Provided Code
+1. Conecte o repositório no Netlify
+2. Configure:
+   - **Base directory:** `front-end`
+   - **Build command:** `npm run build`
+   - **Publish directory:** `front-end/dist`
+3. Adicione variável de ambiente:
+   - `VITE_API_URL=https://rockstars-api.dots.dev.br`
 
-### REST Data with Panache
+### Backend (Docker)
 
-Generating Jakarta REST resources with Panache
+```bash
+# Build da imagem
+docker build -t rockstars-api ./back-end
 
-[Related guide section...](https://quarkus.io/guides/rest-data-panache)
+# Executar
+docker run -p 3000:8080 rockstars-api
+```
 
+---
 
-### REST
+## Variáveis de Ambiente
 
-Easily start your REST Web Services
+Consulte o arquivo [.env.example](./.env.example) para a lista completa de variáveis.
 
-[Related guide section...](https://quarkus.io/guides/getting-started-reactive#reactive-jax-rs-resources)
+| Variável | Descrição | Exemplo |
+|----------|-----------|---------|
+| `POSTGRES_USER` | Usuário do banco | `sa_rockstar` |
+| `POSTGRES_PASSWORD` | Senha do banco | `*****` |
+| `MINIO_ACCESS_KEY` | Chave de acesso MinIO | `*****` |
+| `MINIO_SECRET_KEY` | Chave secreta MinIO | `*****` |
+| `ADMIN_USERNAME` | Usuário admin inicial | `admin` |
+| `ADMIN_PASSWORD` | Senha admin inicial | `*****` |
+| `JWT_ISSUER` | Emissor do JWT | `https://rockstars.com.br` |
+| `VITE_API_URL` | URL da API para o frontend | `http://localhost:3000` |
+
+---
+
+## Licença
+
+Este projeto foi desenvolvido como parte de processo seletivo e é de uso exclusivo para avaliação técnica.
+
+---
+
+## Autor
+
+**Diego Lucio da Cunha Lobo**
+
+- GitHub: [@diegolobo](https://github.com/diegolobo)
